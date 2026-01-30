@@ -1,0 +1,89 @@
+# Master Status - 全足軽の状態管理
+# ================================
+# 家老が参照・更新するファイル
+
+last_updated: null
+updated_by: null
+
+# 足軽の状態
+# status: idle | in_progress | done | error
+ashigaru:
+  ashigaru_1:
+    status: idle
+    persona: null
+    current_task: null
+    assigned_at: null
+    completed_at: null
+    last_error: null
+
+  ashigaru_2:
+    status: idle
+    persona: null
+    current_task: null
+    assigned_at: null
+    completed_at: null
+    last_error: null
+
+  ashigaru_3:
+    status: idle
+    persona: null
+    current_task: null
+    assigned_at: null
+    completed_at: null
+    last_error: null
+
+  ashigaru_4:
+    status: idle
+    persona: null
+    current_task: null
+    assigned_at: null
+    completed_at: null
+    last_error: null
+
+  ashigaru_5:
+    status: idle
+    persona: null
+    current_task: null
+    assigned_at: null
+    completed_at: null
+    last_error: null
+
+  ashigaru_6:
+    status: idle
+    persona: null
+    current_task: null
+    assigned_at: null
+    completed_at: null
+    last_error: null
+
+  ashigaru_7:
+    status: idle
+    persona: null
+    current_task: null
+    assigned_at: null
+    completed_at: null
+    last_error: null
+
+  ashigaru_8:
+    status: idle
+    persona: null
+    current_task: null
+    assigned_at: null
+    completed_at: null
+    last_error: null
+
+# 統計情報
+statistics:
+  total_tasks_completed: 0
+  total_tasks_failed: 0
+  average_task_duration_minutes: 0
+  most_used_persona: null
+
+# 現在のミッション
+current_mission:
+  mission_id: null
+  objective: null
+  total_tasks: 0
+  completed_tasks: 0
+  failed_tasks: 0
+  in_progress_tasks: 0

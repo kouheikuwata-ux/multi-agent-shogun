@@ -1,0 +1,100 @@
+# 並列ファイル作成スキル
+# ================================
+
+name: "parallel_file_creation"
+version: "1.0.0"
+description: "複数のファイルを並列で作成するスキル。各足軽に1ファイルずつ割り当て、同時に作成する。"
+
+# 作成情報
+created_by: "shogun"
+created_at: "2024-01-01T00:00:00+09:00"
+approved_by: "human"
+approved_at: null
+
+# 入力スキーマ
+input:
+  type: object
+  required:
+    - files
+  properties:
+    files:
+      type: array
+      description: "作成するファイルのリスト"
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+            description: "ファイル名"
+          content:
+            type: string
+            description: "ファイル内容（省略時はデフォルト）"
+          output_dir:
+            type: string
+            description: "出力ディレクトリ（省略時は test_output/）"
+
+# 出力スキーマ
+output:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: "全ファイルの作成が成功したか"
+    created_files:
+      type: array
+      description: "作成されたファイルのパス一覧"
+      items:
+        type: string
+    failed_files:
+      type: array
+      description: "作成に失敗したファイル一覧"
+      items:
+        type: string
+    duration_seconds:
+      type: number
+      description: "所要時間（秒）"
+
+# 推奨ペルソナ
+recommended_persona: "senior_engineer"
+
+# 使用例
+examples:
+  - name: "3ファイル並列作成"
+    input:
+      files:
+        - name: "hello1.md"
+          content: "# Hello 1\n\nこれは足軽1番が作成したファイルです。"
+        - name: "hello2.md"
+          content: "# Hello 2\n\nこれは足軽2番が作成したファイルです。"
+        - name: "hello3.md"
+          content: "# Hello 3\n\nこれは足軽3番が作成したファイルです。"
+    expected_output:
+      success: true
+      created_files:
+        - "test_output/hello1.md"
+        - "test_output/hello2.md"
+        - "test_output/hello3.md"
+      failed_files: []
+
+# 依存関係
+dependencies: []
+
+# タグ
+tags:
+  - file_operation
+  - parallel
+  - demo
+
+# 実行手順
+execution_steps:
+  1: "家老がファイル数に応じた足軽を選定"
+  2: "各足軽に1ファイルずつ割り当て（最小権限原則）"
+  3: "並列でファイル作成を実行"
+  4: "各足軽が報告ファイルに結果を書き込み"
+  5: "家老が報告を集約し、成否を判定"
+
+# 注意事項
+notes:
+  - "各足軽は自分の担当ファイルのみ作成する"
+  - "他の足軽の担当ファイルには絶対に触れない"
+  - "競合が発生した場合、家老がタスク分割を見直す"

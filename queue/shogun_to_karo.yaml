@@ -1,0 +1,23 @@
+# 将軍 → 家老 への指示
+# ================================
+# 将軍が書き込み、家老が読み取る
+
+# 現在の指示（nullの場合は指示なし）
+current_mission: null
+
+# 指示の形式例:
+# current_mission:
+#   mission_id: "20240101-120000"
+#   objective: "テストファイル3つを並列作成する"
+#   constraints:
+#     - "各足軽は自分の担当ファイルのみ作成"
+#     - "他の足軽のファイルに触れない"
+#   success_criteria:
+#     - "hello1.md, hello2.md, hello3.md が作成される"
+#     - "各ファイルに適切な内容が記載される"
+#   priority: high
+#   timestamp: "2024-01-01T12:00:00+09:00"
+#   notes: "デモタスク"
+
+# 過去の指示履歴
+history: []

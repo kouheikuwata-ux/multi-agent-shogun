@@ -1,0 +1,89 @@
+# Multi-Agent Shogun - 全体設定
+# ================================
+
+system:
+  name: "multi-agent-shogun"
+  version: "1.0.0"
+  description: "戦国風マルチエージェントオーケストレーション基盤"
+
+# 言語設定
+# ja: 戦国風日本語のみ
+# en: 英語のみ
+# ja+en: 戦国風日本語 + 英訳併記
+language: "ja"
+
+# エージェント設定
+agents:
+  shogun:
+    name: "将軍"
+    tmux_window: "0:shogun"
+    max_concurrent_tasks: 1
+
+  karo:
+    name: "家老"
+    tmux_window: "1:karo"
+    max_concurrent_tasks: 3
+
+  ashigaru:
+    name: "足軽"
+    tmux_window: "2:ashigaru"
+    count: 8
+    panes: [1, 2, 3, 4, 5, 6, 7, 8]
+
+# ペルソナ定義
+personas:
+  senior_engineer:
+    ja: "熟練の技師"
+    en: "Senior Software Engineer"
+    skills: ["coding", "architecture", "debugging"]
+
+  technical_writer:
+    ja: "記録係"
+    en: "Technical Writer"
+    skills: ["documentation", "explanation"]
+
+  analyst:
+    ja: "軍師"
+    en: "Analyst"
+    skills: ["research", "analysis", "planning"]
+
+  ui_designer:
+    ja: "意匠師"
+    en: "UI Designer"
+    skills: ["design", "ux", "styling"]
+
+  tester:
+    ja: "検分役"
+    en: "QA Tester"
+    skills: ["testing", "validation", "quality"]
+
+  devops:
+    ja: "陣地構築師"
+    en: "DevOps Engineer"
+    skills: ["deployment", "infrastructure", "ci_cd"]
+
+# 通信設定
+communication:
+  method: "yaml_file"
+  polling: false  # ポーリング禁止
+  event_driven: true
+  send_keys_split: true  # send-keysは必ず2回に分ける
+
+# Git/GitHub設定
+git:
+  auto_commit: true
+  commit_format: "smart-commit"
+  auto_push: true
+  branch_strategy: "feature-branch"
+
+# Vercel設定
+vercel:
+  auto_deploy: true
+  preview_on_push: true
+  record_urls_in_dashboard: true
+
+# コスト管理
+cost:
+  target_monthly_usd: 100
+  api_optimization: true
+  idle_consumption: 0  # 待機中のAPI消費ゼロ

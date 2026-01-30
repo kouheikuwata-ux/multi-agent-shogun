@@ -1,0 +1,51 @@
+# スキルパッケージ定義
+# ================================
+
+name: "skill_name"
+version: "1.0.0"
+description: "スキルの説明"
+
+# 作成情報
+created_by: "shogun"
+created_at: null
+approved_by: "human"
+approved_at: null
+
+# 入力スキーマ
+input:
+  type: object
+  required: []
+  properties:
+    # 例:
+    # file_name:
+    #   type: string
+    #   description: "作成するファイル名"
+
+# 出力スキーマ
+output:
+  type: object
+  properties:
+    # 例:
+    # success:
+    #   type: boolean
+    # created_files:
+    #   type: array
+    #   items:
+    #     type: string
+
+# 推奨ペルソナ
+recommended_persona: "senior_engineer"
+
+# 使用例
+examples:
+  - name: "基本的な使用例"
+    input:
+      # 入力例
+    expected_output:
+      # 期待される出力
+
+# 依存関係
+dependencies: []
+
+# タグ
+tags: []

@@ -1,0 +1,36 @@
+# Multi-Agent Shogun - Git Ignore
+
+# テスト出力
+test_output/
+!test_output/.gitkeep
+
+# キューファイル（動的に生成される）
+queue/tasks/*.yaml
+!queue/tasks/.gitkeep
+queue/reports/*.yaml
+!queue/reports/.gitkeep
+
+# ただし shogun_to_karo.yaml のテンプレートは保持
+!queue/shogun_to_karo.yaml
+
+# 一時ファイル
+*.tmp
+*.log
+*.swp
+*~
+
+# OS固有
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Node.js（スキルに含まれる場合）
+node_modules/
+
+# 環境変数
+.env
+.env.local
+.env.*.local
