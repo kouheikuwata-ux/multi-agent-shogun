@@ -1,46 +1,125 @@
-# 並列ファイル作成スキル
+# 並列ファイル作成スキル（役割別対応版）
 # ================================
 
 name: "parallel-file-creation"
-version: "1.0.0"
-description: "複数のファイルを足軽に分担させて並列作成するスキル"
+version: "2.0.0"
+description: |
+  複数の足軽が、それぞれの専門ペルソナに応じたファイルを並列作成する。
+  開発者はコードを、ライターはドキュメントを、デザイナーはスタイルを作成。
 
 created_by: "shogun"
 created_at: "2026-01-30T12:30:00+09:00"
+updated_at: "2026-01-30T12:45:00+09:00"
 approved_by: "human"
-approved_at: "2026-01-30T12:30:00+09:00"
+
+# ペルソナと担当ファイルタイプの対応
+persona_file_mapping:
+  senior_engineer:
+    name: "熟練の技師"
+    specialty: "コーディング、アーキテクチャ、デバッグ"
+    file_types:
+      - "*.ts, *.tsx, *.js, *.jsx"
+      - "*.py, *.go, *.rs"
+      - "*.json (設定ファイル)"
+    example_tasks:
+      - "APIエンドポイントの実装"
+      - "コンポーネントの作成"
+      - "ユーティリティ関数の実装"
+
+  technical_writer:
+    name: "記録係"
+    specialty: "ドキュメント作成、説明文"
+    file_types:
+      - "*.md (README, ガイド)"
+      - "*.txt"
+      - "CHANGELOG, CONTRIBUTING"
+    example_tasks:
+      - "README作成"
+      - "API仕様書作成"
+      - "使用ガイド作成"
+
+  analyst:
+    name: "軍師"
+    specialty: "調査、分析、計画立案"
+    file_types:
+      - "*.md (分析レポート)"
+      - "*.yaml (設計定義)"
+      - "*.json (データ分析結果)"
+    example_tasks:
+      - "要件分析ドキュメント"
+      - "競合調査レポート"
+      - "技術選定資料"
+
+  ui_designer:
+    name: "意匠師"
+    specialty: "デザイン、UX、スタイリング"
+    file_types:
+      - "*.css, *.scss"
+      - "*.svg"
+      - "tailwind.config.js"
+    example_tasks:
+      - "スタイルシート作成"
+      - "カラーパレット定義"
+      - "レスポンシブデザイン実装"
+
+  tester:
+    name: "検分役"
+    specialty: "テスト、検証、品質確認"
+    file_types:
+      - "*.test.ts, *.spec.ts"
+      - "*.test.js, *.spec.js"
+      - "e2e/*.ts"
+    example_tasks:
+      - "ユニットテスト作成"
+      - "E2Eテスト作成"
+      - "テストデータ準備"
+
+  devops:
+    name: "陣地構築師"
+    specialty: "デプロイ、インフラ、CI/CD"
+    file_types:
+      - "Dockerfile"
+      - ".github/workflows/*.yaml"
+      - "vercel.json, netlify.toml"
+    example_tasks:
+      - "CI/CDパイプライン構築"
+      - "Docker設定"
+      - "デプロイ設定"
 
 # 入力スキーマ
 input:
   type: object
   required:
-    - files
+    - tasks
   properties:
-    files:
+    tasks:
       type: array
-      description: "作成するファイルのリスト"
+      description: "作成するタスクのリスト（ペルソナ別）"
       items:
         type: object
         required:
-          - name
+          - file
+          - persona
         properties:
-          name:
+          file:
             type: string
-            description: "ファイル名（例: hello1.md）"
-          content:
+            description: "作成するファイルパス"
+          persona:
             type: string
-            description: "ファイル内容（省略時はデフォルトテンプレート）"
-          template:
+            enum: ["senior_engineer", "technical_writer", "analyst", "ui_designer", "tester", "devops"]
+            description: "担当ペルソナ"
+          description:
             type: string
-            description: "使用するテンプレート名（省略可）"
+            description: "ファイルの目的・内容の説明"
+          requirements:
+            type: array
+            description: "具体的な要件リスト"
+            items:
+              type: string
     output_dir:
       type: string
-      default: "test_output"
-      description: "出力ディレクトリ"
-    persona:
-      type: string
-      default: "technical_writer"
-      description: "足軽に割り当てるペルソナ"
+      default: "."
+      description: "ベース出力ディレクトリ"
 
 # 出力スキーマ
 output:
@@ -48,81 +127,93 @@ output:
   properties:
     success:
       type: boolean
-      description: "全ファイルの作成が成功したか"
-    created_files:
+    results:
       type: array
-      description: "作成されたファイルのパス一覧"
       items:
-        type: string
-    failed_files:
-      type: array
-      description: "作成に失敗したファイル一覧"
-      items:
-        type: string
-    reports:
-      type: array
-      description: "各足軽の報告ファイルパス"
-      items:
-        type: string
-
-# 推奨ペルソナ
-recommended_persona: "technical_writer"
-
-# 実行手順
-execution_steps:
-  1: "将軍がミッションを queue/shogun_to_karo.yaml に書き込む"
-  2: "将軍が家老を Task機能で起動"
-  3: "家老がファイル数に応じた足軽を選定"
-  4: "家老が各足軽に1ファイルずつ割り当て（最小権限原則）"
-  5: "家老が足軽を並列で Task起動（run_in_background: true）"
-  6: "各足軽がファイル作成・報告ファイル作成"
-  7: "家老が報告を集約し、ダッシュボード更新"
-  8: "将軍が結果を人間に報告"
+        type: object
+        properties:
+          file:
+            type: string
+          persona:
+            type: string
+          status:
+            type: string
+            enum: ["completed", "failed"]
 
 # 使用例
 examples:
-  - name: "3ファイル並列作成"
+  - name: "機能開発（複数役割）"
     prompt: |
-      parallel-file-creationスキルを使って、
-      以下のファイルを作成してください：
-      - report1.md
-      - report2.md
-      - report3.md
+      新しいユーザー認証機能を作成してください：
+      - 開発者: auth.ts（認証ロジック）
+      - テスター: auth.test.ts（テスト）
+      - ライター: AUTH.md（仕様書）
     input:
-      files:
-        - name: "report1.md"
-        - name: "report2.md"
-        - name: "report3.md"
-      output_dir: "test_output"
-    expected_output:
-      success: true
-      created_files:
-        - "test_output/report1.md"
-        - "test_output/report2.md"
-        - "test_output/report3.md"
+      tasks:
+        - file: "lib/auth.ts"
+          persona: "senior_engineer"
+          description: "ユーザー認証ロジック"
+          requirements:
+            - "JWT認証"
+            - "リフレッシュトークン対応"
+        - file: "lib/auth.test.ts"
+          persona: "tester"
+          description: "認証ロジックのテスト"
+          requirements:
+            - "正常系テスト"
+            - "異常系テスト"
+        - file: "docs/AUTH.md"
+          persona: "technical_writer"
+          description: "認証機能の仕様書"
 
-  - name: "内容指定で作成"
+  - name: "UI機能開発"
     prompt: |
-      parallel-file-creationスキルを使って、
-      chapter1.md（第1章の内容）と chapter2.md（第2章の内容）を作成
+      ダークモード機能を実装：
+      - 開発者: ThemeProvider.tsx
+      - デザイナー: theme.css
+      - ライター: THEME.md
     input:
-      files:
-        - name: "chapter1.md"
-          content: "# 第1章\n\nここに第1章の内容"
-        - name: "chapter2.md"
-          content: "# 第2章\n\nここに第2章の内容"
-      output_dir: "docs"
+      tasks:
+        - file: "components/ThemeProvider.tsx"
+          persona: "senior_engineer"
+          description: "テーマ切り替えプロバイダー"
+        - file: "styles/theme.css"
+          persona: "ui_designer"
+          description: "ダークモード用スタイル"
+        - file: "docs/THEME.md"
+          persona: "technical_writer"
+          description: "テーマ機能の使用方法"
 
-# 制約事項
+  - name: "インフラ構築"
+    prompt: |
+      CI/CD環境を構築：
+      - DevOps: GitHub Actions
+      - ライター: デプロイガイド
+    input:
+      tasks:
+        - file: ".github/workflows/ci.yaml"
+          persona: "devops"
+          description: "CI/CDパイプライン"
+        - file: "docs/DEPLOY.md"
+          persona: "technical_writer"
+          description: "デプロイ手順書"
+
+# 実行手順
+execution_steps:
+  1: "将軍がタスク一覧を分析"
+  2: "家老がペルソナ別にタスクを分配"
+  3: "各足軽が専門ペルソナとして担当ファイルを作成"
+  4: "家老が報告を集約"
+  5: "将軍が結果を報告"
+
+# 制約
 constraints:
-  - "各足軽は自分の担当ファイルのみ作成する"
-  - "他の足軽のファイルに触れない"
-  - "ファイル間に依存関係がある場合は使用不可"
-  - "単一ファイルの場合は直接作成を推奨"
+  - "各足軽は自分の担当ファイルのみ作成"
+  - "ペルソナに適したファイル形式・内容を作成"
+  - "他の足軽のファイルに依存する場合は順序を考慮"
 
-# タグ
 tags:
-  - file_operation
+  - multi-role
   - parallel
+  - development
   - automation
-  - multi-agent
