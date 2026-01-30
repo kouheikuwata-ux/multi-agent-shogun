@@ -1,223 +1,163 @@
 # Multi-Agent Shogun
 
 > 戦国風マルチエージェントオーケストレーション基盤
+> Windows + Cursor + Claude Code で動作
 
 人間は指示と承認のみを行い、それ以外の設計・タスク分解・実行・改善・知識化はAIに任せるシステムです。
 
 ## 概要
 
-- **将軍** (1体): 人間からの指示を受け取り、全体戦略を司る
-- **家老** (1体): タスクを分解し、足軽に割り振る
-- **足軽** (8体): 実際のタスクを並列で実行する
+```
+人間（主君）
+  │ 指示
+  ▼
+┌─────────┐
+│  将軍   │ ← メインのClaude Codeセッション
+└────┬────┘
+     │ Task機能
+     ▼
+┌─────────┐
+│  家老   │ ← サブエージェント（タスク分解）
+└────┬────┘
+     │ Task機能（並列）
+     ▼
+┌─────────────────────────┐
+│ 足軽1 │ 足軽2 │ 足軽3  │ ← 並列実行
+└─────────────────────────┘
+```
+
+## 環境要件（全て既存、新規インストール不要）
+
+| 項目 | 状態 |
+|------|------|
+| Node.js | ✓ |
+| Git | ✓ |
+| Claude Code | ✓ |
+| Cursor | ✓ |
 
 ## クイックスタート
 
-### 1. 前提条件
+### 1. 将軍モードで起動
 
-```bash
-# Claude Code のインストール
-npm install -g @anthropic-ai/claude-code
+Cursor内のClaude Codeで以下を入力：
 
-# tmux のインストール（未インストールの場合）
-# Ubuntu/Debian:
-sudo apt install tmux
-# macOS:
-brew install tmux
+```
+あなたは将軍です。
+~/multi-agent-shogun/instructions/shogun.md を読み、
+以下のタスクを実行してください：
+
+「3つのファイルを並列で作成せよ」
 ```
 
-### 2. tmux セッション構築
+### 2. 結果を確認
 
-```bash
-cd ~/multi-agent-shogun
-chmod +x scripts/*.sh
-./scripts/setup_tmux.sh
-```
-
-### 3. エージェント起動
-
-```bash
-./scripts/start_agents.sh
-```
-
-### 4. セッションに接続
-
-```bash
-tmux attach -t multiagent
-```
-
-### 5. タスクを与える
-
-将軍ウィンドウ (Ctrl+b 0) で:
-```
-テストして
-```
+- `test_output/` に成果物が作成される
+- `status/dashboard.md` で進捗を確認
 
 ## ディレクトリ構成
 
 ```
-multi-agent-shogun/
-├── config/
-│   └── settings.yaml          # 全体設定
-├── instructions/
-│   ├── shogun.md              # 将軍の指示書
-│   ├── karo.md                # 家老の指示書
-│   └── ashigaru.md            # 足軽の指示書
-├── queue/
-│   ├── shogun_to_karo.yaml    # 将軍→家老の指示
-│   ├── tasks/
-│   │   └── ashigaru{N}.yaml   # 家老→足軽Nへの指示
-│   └── reports/
-│       └── ashigaru{N}_report.yaml  # 足軽N→家老への報告
+~/multi-agent-shogun/
+├── instructions/          # 役職別指示書
+│   ├── shogun.md         # 将軍
+│   ├── karo.md           # 家老
+│   └── ashigaru.md       # 足軽
+├── queue/                 # 通信キュー
+│   ├── shogun_to_karo.yaml
+│   ├── tasks/            # タスク定義
+│   └── reports/          # 報告
 ├── status/
-│   ├── dashboard.md           # 進捗ダッシュボード
-│   └── master_status.yaml     # 全体ステータス
-├── skills/
-│   └── {skill_name}/          # スキルパッケージ
-├── scripts/
-│   ├── setup_tmux.sh          # tmuxセッション構築
-│   ├── start_agents.sh        # エージェント起動
-│   ├── setup_project.sh       # プロジェクト初期化
-│   ├── send_message.sh        # メッセージ送信ヘルパー
-│   ├── run_demo.sh            # デモタスク実行
-│   └── check_status.sh        # ステータス確認
-├── templates/
-│   └── skill_template/        # スキルテンプレート
-└── test_output/               # テスト成果物
+│   ├── dashboard.md      # 進捗ダッシュボード
+│   └── master_status.yaml
+├── skills/                # スキルパッケージ
+├── config/
+│   └── settings.yaml
+├── test_output/           # 成果物
+├── SPECIFICATION.md       # 詳細仕様書
+└── README.md
 ```
 
-## tmux 操作
+## 通信フロー
 
-| キー | 動作 |
-|------|------|
-| Ctrl+b 0 | 将軍ウィンドウ |
-| Ctrl+b 1 | 家老ウィンドウ |
-| Ctrl+b 2 | 足軽ウィンドウ |
-| Ctrl+b 矢印 | ペイン切り替え (足軽内) |
-| Ctrl+b d | デタッチ |
+```yaml
+# 1. 将軍が家老に指示
+queue/shogun_to_karo.yaml:
+  mission_id: "20240130-120000"
+  objective: "3つのファイルを並列作成"
 
-## 通信規定
+# 2. 家老が足軽にタスク割当
+queue/tasks/task_001.yaml:
+  task_id: "TASK-001"
+  objective: "hello1.md を作成"
+  output_path: "test_output/hello1.md"
 
-### イベント駆動
-
-- **ポーリング禁止**: 待機中のAPI消費ゼロ
-- **send-keys駆動**: tmux send-keys で起こされてから実行
-
-### send-keys 2分割ルール
-
-```bash
-# 正しい例
-tmux send-keys -t multiagent:karo "メッセージ"
-tmux send-keys -t multiagent:karo Enter
-
-# 誤った例（禁止）
-tmux send-keys -t multiagent:karo "メッセージ" Enter
+# 3. 足軽が報告
+queue/reports/report_001.yaml:
+  task_id: "TASK-001"
+  status: "completed"
+  deliverables: ["test_output/hello1.md"]
 ```
 
-### 通信禁止事項
+## 禁止事項
 
-- 足軽→将軍への直接送信
-- 家老→将軍への直接send-keys
-- 人間への直接話しかけ
-
-## 最小権限の原則
-
-各足軽は自分専用のファイルのみ操作可能:
-
-| 足軽 | 読み取り可能 | 書き込み可能 |
-|------|-------------|-------------|
-| 足軽1 | ashigaru1.yaml | ashigaru1_report.yaml, 担当ファイル |
-| 足軽2 | ashigaru2.yaml | ashigaru2_report.yaml, 担当ファイル |
-| ... | ... | ... |
+| 役職 | 禁止事項 |
+|------|---------|
+| 将軍 | 自分でタスク実行、足軽への直接指示 |
+| 家老 | ファイル編集、人間への直接報告 |
+| 足軽 | 他タスクへの干渉、将軍への直接報告 |
 
 ## ペルソナ
 
-| ID | 日本語名 | 英語名 | 専門 |
-|----|---------|--------|------|
-| senior_engineer | 熟練の技師 | Senior Software Engineer | コーディング |
-| technical_writer | 記録係 | Technical Writer | ドキュメント |
-| analyst | 軍師 | Analyst | 調査・分析 |
-| ui_designer | 意匠師 | UI Designer | デザイン |
-| tester | 検分役 | QA Tester | テスト |
-| devops | 陣地構築師 | DevOps Engineer | デプロイ |
+| ID | 日本語 | 専門 |
+|----|--------|------|
+| senior_engineer | 熟練の技師 | コーディング |
+| technical_writer | 記録係 | ドキュメント |
+| analyst | 軍師 | 調査・分析 |
+| ui_designer | 意匠師 | デザイン |
+| tester | 検分役 | テスト |
+| devops | 陣地構築師 | デプロイ |
+
+## 使用例
+
+### 並列ファイル作成
+
+```
+人間: 「3つのファイルを並列で作成せよ」
+
+将軍: 「主命を承った。家老を呼び出す。」
+      → Task(家老)起動
+
+家老: 「将軍より命を受けた。3名の足軽を編成する。」
+      → Task(足軽1), Task(足軽2), Task(足軽3) 並列起動
+
+足軽1: 「hello1.md を作成いたした。」
+足軽2: 「hello2.md を作成いたした。」
+足軽3: 「hello3.md を作成いたした。」
+
+家老: 「全軍、任務完了。」
+
+将軍: 「見事なり。成果物: hello1.md, hello2.md, hello3.md」
+```
+
+### ダッシュボード監視
+
+Cursorで `status/dashboard.md` を開いてプレビュー表示。
 
 ## 新規プロジェクトへの適用
 
 ```bash
-# 新しいプロジェクトディレクトリに移動
-cd /path/to/your/project
-
-# 初期化スクリプト実行
+# プロジェクトディレクトリで初期化
 ~/multi-agent-shogun/scripts/setup_project.sh
-
-# multi_agent_config.yaml を編集
-# Git/Vercel設定を追加
-
-# tmuxセッション構築 & エージェント起動
-./scripts/setup_tmux.sh
-./scripts/start_agents.sh
 ```
 
-## Git/GitHub/Vercel 連携
+## Git/Vercel連携
 
-### 自動コミット
+- 足軽が成果物をコミット
+- GitHubプッシュでVercel自動デプロイ
+- プレビューURLをdashboard.mdに記録
 
-足軽は成果物作成後、自動でコミット:
+## コスト
 
-```
-feat(ashigaru1): hello1.md を作成
-
-- 影響範囲: test_output/hello1.md
-- レビュー観点: ファイル内容の確認
-- 担当: 足軽1番 (熟練の技師)
-```
-
-### Vercel 自動デプロイ
-
-- GitHub へのプッシュで自動プレビュー
-- デプロイURLは dashboard.md に記録
-- 人間はプレビューを確認して承認
-
-## コスト管理
-
-- **目標**: 月額 $100 以内
-- **方式**: イベント駆動（待機中のAPI消費ゼロ）
-- **最適化**: 必要最小限の足軽動員
-
-## デモタスク
-
-```bash
-# 3つのファイルを並列作成するテスト
-./scripts/run_demo.sh
-```
-
-期待される結果:
-- `test_output/hello1.md` (足軽1番)
-- `test_output/hello2.md` (足軽2番)
-- `test_output/hello3.md` (足軽3番)
-
-## トラブルシューティング
-
-### セッションが存在しない
-
-```bash
-./scripts/setup_tmux.sh
-```
-
-### エージェントが応答しない
-
-```bash
-# セッション再構築
-tmux kill-session -t multiagent
-./scripts/setup_tmux.sh
-./scripts/start_agents.sh
-```
-
-### ステータス確認
-
-```bash
-./scripts/check_status.sh
-```
-
-## ライセンス
-
-Private - 個人使用のみ
+- Claude Maxサブスクリプション内で動作
+- 待機中のAPI消費なし（イベント駆動）
+- 月額$100以内で運用可能
