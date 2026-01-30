@@ -1,0 +1,128 @@
+# 並列ファイル作成スキル
+# ================================
+
+name: "parallel-file-creation"
+version: "1.0.0"
+description: "複数のファイルを足軽に分担させて並列作成するスキル"
+
+created_by: "shogun"
+created_at: "2026-01-30T12:30:00+09:00"
+approved_by: "human"
+approved_at: "2026-01-30T12:30:00+09:00"
+
+# 入力スキーマ
+input:
+  type: object
+  required:
+    - files
+  properties:
+    files:
+      type: array
+      description: "作成するファイルのリスト"
+      items:
+        type: object
+        required:
+          - name
+        properties:
+          name:
+            type: string
+            description: "ファイル名（例: hello1.md）"
+          content:
+            type: string
+            description: "ファイル内容（省略時はデフォルトテンプレート）"
+          template:
+            type: string
+            description: "使用するテンプレート名（省略可）"
+    output_dir:
+      type: string
+      default: "test_output"
+      description: "出力ディレクトリ"
+    persona:
+      type: string
+      default: "technical_writer"
+      description: "足軽に割り当てるペルソナ"
+
+# 出力スキーマ
+output:
+  type: object
+  properties:
+    success:
+      type: boolean
+      description: "全ファイルの作成が成功したか"
+    created_files:
+      type: array
+      description: "作成されたファイルのパス一覧"
+      items:
+        type: string
+    failed_files:
+      type: array
+      description: "作成に失敗したファイル一覧"
+      items:
+        type: string
+    reports:
+      type: array
+      description: "各足軽の報告ファイルパス"
+      items:
+        type: string
+
+# 推奨ペルソナ
+recommended_persona: "technical_writer"
+
+# 実行手順
+execution_steps:
+  1: "将軍がミッションを queue/shogun_to_karo.yaml に書き込む"
+  2: "将軍が家老を Task機能で起動"
+  3: "家老がファイル数に応じた足軽を選定"
+  4: "家老が各足軽に1ファイルずつ割り当て（最小権限原則）"
+  5: "家老が足軽を並列で Task起動（run_in_background: true）"
+  6: "各足軽がファイル作成・報告ファイル作成"
+  7: "家老が報告を集約し、ダッシュボード更新"
+  8: "将軍が結果を人間に報告"
+
+# 使用例
+examples:
+  - name: "3ファイル並列作成"
+    prompt: |
+      parallel-file-creationスキルを使って、
+      以下のファイルを作成してください：
+      - report1.md
+      - report2.md
+      - report3.md
+    input:
+      files:
+        - name: "report1.md"
+        - name: "report2.md"
+        - name: "report3.md"
+      output_dir: "test_output"
+    expected_output:
+      success: true
+      created_files:
+        - "test_output/report1.md"
+        - "test_output/report2.md"
+        - "test_output/report3.md"
+
+  - name: "内容指定で作成"
+    prompt: |
+      parallel-file-creationスキルを使って、
+      chapter1.md（第1章の内容）と chapter2.md（第2章の内容）を作成
+    input:
+      files:
+        - name: "chapter1.md"
+          content: "# 第1章\n\nここに第1章の内容"
+        - name: "chapter2.md"
+          content: "# 第2章\n\nここに第2章の内容"
+      output_dir: "docs"
+
+# 制約事項
+constraints:
+  - "各足軽は自分の担当ファイルのみ作成する"
+  - "他の足軽のファイルに触れない"
+  - "ファイル間に依存関係がある場合は使用不可"
+  - "単一ファイルの場合は直接作成を推奨"
+
+# タグ
+tags:
+  - file_operation
+  - parallel
+  - automation
+  - multi-agent
